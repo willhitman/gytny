@@ -1,0 +1,67 @@
+# Virtual environment
+venv/
+env/
+.venv/
+.env/
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Logs and local development files
+*.log
+*.sqlite3
+*.db
+debug.log
+
+# Django-related files
+/media/
+staticfiles/
+static/
+
+# Ignore migrations cache (optional, but keep actual migrations)
+**/migrations/*.pyc
+**/migrations/*.pyo
+**/migrations/*.pyd
+**/migrations/__pycache__/
+
+# Environment and settings files
+.env
+.env.*   # For multiple environment files like .env.dev, .env.prod
+
+# IDE & editor settings
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Compiled CSS (if using SCSS or LESS)
+*.sass-cache
+*.scssc
+node_modules/
+
+# Docker and deployment files (if using Docker)
+docker-compose.override.yml
+*.dockerfile
+*.pid
+
+# Pytest and test coverage reports
+htmlcov/
+*.cover
+coverage.xml
+*.pytest_cache/
+
+# Celery task queue
+celerybeat-schedule
+celerybeat.pid
+
+# Security and SSH keys
+*.pem
+*.crt
+*.key
+/.env.dev
