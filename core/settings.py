@@ -26,7 +26,7 @@ env = environ.Env(
 )
 
 # Read the .env file
-environ.Env.read_env(os.path.join(BASE_DIR, ".env.dev"))
+environ.Env.read_env(os.path.join(BASE_DIR, ".env.prod"))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-tuhp2x+udb0vm%2lx@vi5q_8kl@avb0j1qx714ce7%1ah5@=12'
