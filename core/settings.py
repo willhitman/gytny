@@ -40,6 +40,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
+    '18.135.25.233'
     # add any other origins that you want to allow
 ]
 
