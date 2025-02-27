@@ -2,6 +2,7 @@ from django.db import transaction
 from django.shortcuts import render
 from rest_framework import status
 from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.permissions import IsAuthenticated
 
 from AuthAccounts.models import User
 from guide.models import Guide, Route, Like, DisLike, Share
@@ -12,13 +13,13 @@ from rest_framework.response import Response
 # Create your views here.
 class CreateGuideView(CreateAPIView):
     serializer_class = CreateGuideSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Guide.objects.all()
 
 
 class GetUpdateDestroyGuideView(GenericAPIView):
     serializer_class = CreateGuideSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Guide.objects.all()
 
     def get(self, request, pk):
@@ -50,13 +51,13 @@ class GetUpdateDestroyGuideView(GenericAPIView):
 
 class CreateRouteView(CreateAPIView):
     serializer_class = CreateRouteSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
 
 class GetUpdateDestroyRouteView(GenericAPIView):
     serializer_class = CreateGuideSerializer
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def get(self, request, pk):
@@ -87,7 +88,7 @@ class GetUpdateDestroyRouteView(GenericAPIView):
 
 
 class LikeRouteView(GenericAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def post(self, request, route_id, user_id):
@@ -113,7 +114,7 @@ class LikeRouteView(GenericAPIView):
 
 
 class UnLikeRouteView(GenericAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def post(self, request, route_id, user_id):
@@ -139,7 +140,7 @@ class UnLikeRouteView(GenericAPIView):
 
 
 class DisLikeRouteView(GenericAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def post(self, request, route_id, user_id):
@@ -161,7 +162,7 @@ class DisLikeRouteView(GenericAPIView):
 
 
 class UnDisLikeRouteView(GenericAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def post(self, request, route_id, user_id):
@@ -186,7 +187,7 @@ class UnDisLikeRouteView(GenericAPIView):
 
 
 class ShareRouteView(GenericAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     queryset = Route.objects.all()
 
     def get(self, request, route_id, user_id):

@@ -1,4 +1,4 @@
-from rest_framework.generics import CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from community.models import ChatRoom
-from community.serializers import CreateRoomSerializer
+from community.serializers import ChatRoomSerializer
 
 
 class WebSocketInfoView(APIView):
@@ -30,8 +30,12 @@ class WebSocketInfoView(APIView):
 
 
 class CreateChatRoomView(CreateAPIView):
-    serializer_class = CreateRoomSerializer
-    permission_classes = []
+    serializer_class = ChatRoomSerializer
+    permission_classes = [IsAuthenticated]
     queryset = ChatRoom.objects.all()
 
 
+class GetChatRoomsView(ListAPIView):
+    serializer_class = ChatRoomSerializer
+    queryset = ChatRoom.objects.all()
+    permission_classes = [IsAuthenticated]
