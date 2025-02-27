@@ -1,6 +1,7 @@
 from django.urls import path
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenRefreshSerializer, \
     TokenVerifySerializer
@@ -19,6 +20,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 class CustomTokenRefreshView(TokenRefreshView):
+    permission_classes = [IsAuthenticated]
+
     @swagger_auto_schema(
         operation_description="Refresh JWT access token",
         request_body=TokenRefreshSerializer,
@@ -29,6 +32,7 @@ class CustomTokenRefreshView(TokenRefreshView):
 
 
 class CustomTokenVerifyView(TokenVerifyView):
+    permission_classes = [IsAuthenticated]
     @swagger_auto_schema(
         operation_description="Verify if a given token is valid",
         request_body=TokenVerifySerializer,
