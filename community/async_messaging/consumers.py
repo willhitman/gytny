@@ -24,7 +24,12 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         self.room_group_name = f'community_chat_{self.room_id}'
         self.user = self.scope['user']
 
-        # Join the room group
+        # 🔥 Ensure the user is authenticated
+        if not self.user or self.user.is_anonymous:
+            await self.close()
+            return
+
+        # 🚶‍♀️‍➡️Join the room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -63,6 +68,8 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
             await self.handle_message(data)
         elif action == 'close_room':
             await self.handle_close_room()
+        elif action == 'typing':
+            await self.handle_typing(data)
 
     async def handle_message(self, data):
 
@@ -100,7 +107,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                             "price": message.content.price
                             # "date_created": str(message.content.date_created.strftime("%Y-%m-%d %H:%M:%S"))
                             if message.content.date_created else None,
-                            },
+                        },
                         "parent_id": message.parent.id if message.parent else None
                         # "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S")
                         if message.date_created else None
@@ -108,6 +115,21 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                 }
 
             )
+
+    async def handle_typing(self, data):
+        await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                "type": "typing_event",
+                "user": self.user.username
+            }
+        )
+
+    async def typing_event(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "typing",
+            "user": event['user']
+        }))
 
     async def handle_close_room(self):
         room = await self.get_room()
