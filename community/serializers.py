@@ -4,7 +4,7 @@ from rest_framework.serializers import ModelSerializer
 from community.models import ChatRoom, RoomMessage, Content
 
 
-class CreateRoomSerializer(ModelSerializer):
+class ChatRoomSerializer(ModelSerializer):
     class Meta:
         model = ChatRoom
         fields = ['creator']
