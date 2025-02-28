@@ -278,6 +278,7 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' for email verification
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
+
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,  # Removes the login button
 }
