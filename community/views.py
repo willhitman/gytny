@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from community.models import ChatRoom
-from community.serializers import CreateChatRoomSerializer
+from community.serializers import CreateChatRoomSerializer, GetChatRoomSerializer
 
 
 class WebSocketInfoView(APIView):
