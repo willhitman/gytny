@@ -1,7 +1,14 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
+from AuthAccounts.models import User
 from community.models import ChatRoom, RoomMessage, Content
+
+
+class CreatorSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name']
 
 
 class CreateChatRoomSerializer(ModelSerializer):
@@ -20,6 +27,8 @@ class CreateChatRoomSerializer(ModelSerializer):
 
 
 class GetChatRoomSerializer(ModelSerializer):
+    creator = CreatorSerializer()
+
     class Meta:
         model = ChatRoom
         exclude = ['date_created', 'last_updated']
