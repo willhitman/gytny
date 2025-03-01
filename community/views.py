@@ -6,7 +6,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from community.models import ChatRoom
-from community.serializers import ChatRoomSerializer
+from community.serializers import CreateChatRoomSerializer
 
 
 class WebSocketInfoView(APIView):
@@ -30,12 +30,12 @@ class WebSocketInfoView(APIView):
 
 
 class CreateChatRoomView(CreateAPIView):
-    serializer_class = ChatRoomSerializer
+    serializer_class = CreateChatRoomSerializer
     permission_classes = [IsAuthenticated]
     queryset = ChatRoom.objects.all()
 
 
 class GetChatRoomsView(ListAPIView):
-    serializer_class = ChatRoomSerializer
+    serializer_class = GetChatRoomSerializer
     queryset = ChatRoom.objects.all()
     permission_classes = [IsAuthenticated]

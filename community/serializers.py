@@ -4,7 +4,7 @@ from rest_framework.serializers import ModelSerializer
 from community.models import ChatRoom, RoomMessage, Content
 
 
-class ChatRoomSerializer(ModelSerializer):
+class CreateChatRoomSerializer(ModelSerializer):
     class Meta:
         model = ChatRoom
         fields = ['creator']
@@ -17,6 +17,12 @@ class ChatRoomSerializer(ModelSerializer):
         representation['date_created'] = instance.date_created
         representation['last_updated'] = instance.last_updated
         return representation
+
+
+class GetChatRoomSerializer(ModelSerializer):
+    class Meta:
+        model = ChatRoom
+        exclude = ['date_created', 'last_updated']
 
 
 class ContentSerializer(ModelSerializer):
