@@ -2,6 +2,7 @@
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import timezone
@@ -22,11 +23,11 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
         self.room_group_name = f'community_chat_{self.room_id}'
-        self.user = self.scope['user']
 
-        # 🔥 Ensure the user is authenticated
-        if not self.user or self.user.is_anonymous:
-            await self.close()
+        self.user = self.scope["user"]
+
+        if isinstance(self.user, AnonymousUser):
+            await self.close(code=403)  # Reject unauthenticated users
             return
 
         # 🚶‍♀️‍➡️Join the room group
@@ -104,12 +105,12 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                             "current_location": message.content.current_location,
                             "destination": message.content.destination,
                             "distance": message.content.distance,
-                            "price": message.content.price
-                            # "date_created": str(message.content.date_created.strftime("%Y-%m-%d %H:%M:%S"))
+                            "price": message.content.price,
+                            "date_created": str(message.content.date_created.strftime("%Y-%m-%d %H:%M:%S"))
                             if message.content.date_created else None,
                         },
-                        "parent_id": message.parent.id if message.parent else None
-                        # "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S")
+                        "parent_id": message.parent.id if message.parent else None,
+                        "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S")
                         if message.date_created else None
                     }
                 }

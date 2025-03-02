@@ -38,11 +38,11 @@ class RoomMessage(models.Model):
 
 
 class Content(models.Model):
-    current_location = models.CharField(max_length=200)
-    destination = models.CharField(max_length=200)
+    current_location = models.CharField(max_length=200, blank=True, null=True)
+    destination = models.CharField(max_length=200, blank=True, null=True)
 
     distance = models.FloatField(default=0.00, blank=True, null=True)
-    price = models.FloatField()
+    price = models.FloatField(default=0.00, blank=True, null=True)
 
     date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True, null=True, blank=True)
