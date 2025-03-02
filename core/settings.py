@@ -34,14 +34,14 @@ SECRET_KEY = 'django-insecure-tuhp2x+udb0vm%2lx@vi5q_8kl@avb0j1qx714ce7%1ah5@=12
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env("DEBUG")
 
-ALLOWED_HOSTS = ['18.135.25.233', '18.135.25.233:8000', 'localhost', '127.0.0.1:8000', '127.0.0.1']
+ALLOWED_HOSTS = ['18.135.25.233', '18.135.25.233:8000', 'ws://118.135.25.233:8000','localhost', '127.0.0.1:8000', '127.0.0.1']
 CORS_ALLOW_ALL_ORIGINS = True
 
 # Application definition
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:8000',
-    '18.135.25.233'
-    # add any other origins that you want to allow
+    '18.135.25.233',
+    'ws://118.135.25.233:8000'
 ]
 
 STATIC_URL = 'static/'
