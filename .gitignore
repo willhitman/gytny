@@ -1,4 +1,6 @@
 # Virtual environment
+core/settings.py
+
 venv/
 env/
 .venv/
