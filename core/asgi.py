@@ -13,10 +13,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 middleware to do that '''
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        WebSocketJWTAuthMiddleware(  # Apply the middleware
-            URLRouter(websocket_urlpatterns)
-        )
+    "websocket": WebSocketJWTAuthMiddleware(  # Apply JWT middleware here
+        URLRouter(websocket_urlpatterns)
     ),
 })
 
