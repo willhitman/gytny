@@ -3,6 +3,8 @@ import os
 
 import django
 
+import community
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
 django.setup()
 
@@ -19,8 +21,12 @@ from core.middleware import WebSocketJWTAuthMiddleware
 middleware to do that '''
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
-    "websocket": WebSocketJWTAuthMiddleware(  # Apply JWT middleware here
-        URLRouter(websocket_urlpatterns)
+    "websocket": WebSocketJWTAuthMiddleware(
+        AuthMiddlewareStack(
+            URLRouter(
+                community.async_messaging.routing.websocket_urlpatterns
+            )
+        )
     ),
 })
 
