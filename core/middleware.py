@@ -4,12 +4,11 @@ from django.contrib.auth import get_user_model
 from django.db import close_old_connections
 from channels.middleware import BaseMiddleware
 from channels.db import database_sync_to_async
-from urllib.parse import parse_qs
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
-
-import logging
-logger = logging.getLogger(__name__)
 
 class WebSocketJWTAuthMiddleware(BaseMiddleware):
     """Custom middleware to authenticate WebSocket connections using JWT."""
@@ -36,7 +35,9 @@ class WebSocketJWTAuthMiddleware(BaseMiddleware):
                 else:
                     logger.warning("Invalid token or user not found")
             else:
-                logger.warning("No authorization header found")
+                logger.warning("No token found in Authorization header")
+        else:
+            logger.warning("No Authorization header found")
 
         # Continue to the next middleware in the stack
         return await super().__call__(scope, receive, send)
@@ -48,5 +49,6 @@ class WebSocketJWTAuthMiddleware(BaseMiddleware):
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
             user = User.objects.get(id=payload["userId"])
             return user
-        except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist):
+        except (jwt.ExpiredSignatureError, jwt.DecodeError, User.DoesNotExist) as e:
+            logger.error(f"JWT error: {e}")
             return None  # Invalid token, return anonymous user
