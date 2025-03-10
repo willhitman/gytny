@@ -154,8 +154,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     def get_message_history(self):
         # Get all questions and their entire reply trees
         questions = RoomMessage.objects.filter(
-            chat_room_id=self.room_id,
-            is_question=True
+            chat_room_id=self.room_id
         ).prefetch_related(
             Prefetch('replies',
                      queryset=RoomMessage.objects.prefetch_related(
