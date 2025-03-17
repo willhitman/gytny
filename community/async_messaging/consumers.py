@@ -197,7 +197,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
     # --- Group Message Handlers ---
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps(event['message']))
+        await self.send(text_data=json.dumps(event['message'], ensure_ascii=False))
 
     async def room_closed(self, event):
         await self.send(text_data=json.dumps({
