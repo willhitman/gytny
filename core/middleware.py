@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
+
 class WebSocketJWTAuthMiddleware(BaseMiddleware):
     """Custom middleware to authenticate WebSocket connections using JWT."""
 

@@ -155,7 +155,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         # Get all questions and their entire reply trees
         questions = RoomMessage.objects.filter(
             chat_room_id=self.room_id
-        ).prefetch_related(
+        ).order_by('pk', 'content__pk').prefetch_related(
             Prefetch('replies',
                      queryset=RoomMessage.objects.prefetch_related(
                          Prefetch('replies',
