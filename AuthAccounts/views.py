@@ -19,7 +19,7 @@ class CreateAccountView(GenericAPIView):
         user_data = {
             'first_name': None if request.data.get('first_name') == '' else request.data.get('first_name'),
             'last_name': None if request.data.get('last_name') == '' else request.data.get('last_name'),
-            'username': None if request.data.get('email') == '' else request.data.get('email'),
+            'username': None if request.data.get('username') == '' else request.data.get('username'),
             'gender': None if request.data.get('gender') == '' else request.data.get('gender'),
             'email': None if request.data.get('email') == '' else request.data.get('email'),
             'password': None if request.data.get('password') == '' else request.data.get('password')
@@ -27,7 +27,7 @@ class CreateAccountView(GenericAPIView):
 
         serializer = self.serializer_class(data=user_data, partial=True)
         if serializer.is_valid():
-            user = User.objects.create(**serializer.data, )
+            user = User.objects.create(**serializer.data )
             user.username = serializer.validated_data['email']
             user.set_password(serializer.data['password'])
             user.save()
