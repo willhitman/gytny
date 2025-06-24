@@ -130,8 +130,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': env("DATABASE_NAME"),
-        'USER': 'root',
-        'PASSWORD': '',
+        'USER': env("DATABASE_USERNAME"),
+        'PASSWORD': env('DATABASE_PASSWORD'),
         'HOST': env("DATABASE_HOST"),  # Or an IP Address that your DB is hosted on
         'PORT': env("DATABASE_PORT"),
         'OPTIONS': {
@@ -217,8 +217,10 @@ AUTHENTICATION_BACKENDS = [
     "AuthAccounts.custom_auth_backend.UserAuthenticationBackend",
     "django.contrib.auth.backends.ModelBackend",
     'social_core.backends.google.GoogleOAuth2',
+    'allauth.account.auth_backends.AuthenticationBackend'
 
 ]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -234,7 +236,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -245,13 +247,6 @@ GOOGLE_OAUTH2_CLIENT_ID = env.str("GOOGLE_CLIENT_ID", default="")
 GOOGLE_OAUTH2_CLIENT_SECRET = env.str("GOOGLE_CLIENT_SECRET", default="")
 GOOGLE_OAUTH2_PROJECT_ID = env.str("GOOGLE_PROJECT_ID", default="")
 
-SITE_ID = 1  # Required for allauth
-
-# Authentication backends
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
-)
 
 # Google OAuth settings
 SOCIALACCOUNT_PROVIDERS = {
@@ -272,7 +267,6 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'jwt-auth',  # Cookie name for JWT
 }
 
-# Email settings (optional, but recommended)
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_EMAIL_VERIFICATION = 'optional'  # Set to 'mandatory' for email verification
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
