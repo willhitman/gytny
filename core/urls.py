@@ -8,16 +8,16 @@ from django.conf.urls.static import static
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="Doctor Directory API",
+        title="Gytny API",
         default_version='v1',
-        description="Doctor Directory API",
+        description="Gytny  API",
         terms_of_service="",
         contact=openapi.Contact(email="giftwt9wt@gmail.com"),
         license=openapi.License(name=""),
     ),
     public=True,
-    permission_classes=[permissions.AllowAny, ],
-    authentication_classes=[]
+    permission_classes=[permissions.AllowAny]
+
 )
 
 urlpatterns = ([

@@ -16,8 +16,8 @@ class User(AbstractUser):
         ('USER', 'USER'),
     )
 
-    username = models.CharField(max_length=20, blank=True, null=True, unique=True)
-    email = models.EmailField(max_length=50, blank=True, null=True, unique=True)
+    username = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    email = models.EmailField(max_length=254, unique=True, default="server@gytny.co.za")
 
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
@@ -33,6 +33,8 @@ class User(AbstractUser):
     socials = models.ManyToManyField('UserSocials', blank=True)
 
     role = models.CharField(max_length=10, choices=ROLES, default='USER')
+
+    city = models.CharField(max_length=100, blank=True, null=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'

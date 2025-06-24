@@ -27,7 +27,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         self.user = self.scope["user"]
 
         if isinstance(self.user, AnonymousUser):
-            await self.close(code=403)  # Reject unauthenticated users
+            await self.close(code=403, reason="User not authenticated")  # Reject unauthenticated users
             return
 
         # 🚶‍♀️‍➡️Join the room group
@@ -154,7 +154,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     def get_message_history(self):
         # Get all questions and their entire reply trees
         questions = RoomMessage.objects.filter(
-            chat_room_id=self.room_id
+            chat_room_id=self.room_id,
         ).order_by('pk', 'content__pk').prefetch_related(
             Prefetch('replies',
                      queryset=RoomMessage.objects.prefetch_related(
