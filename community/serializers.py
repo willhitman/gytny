@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from AuthAccounts.models import User
-from community.models import ChatRoom, RoomMessage, Content
+from community.models import ChatRoom, RoomMessage
 
 
 class CreatorSerializer(ModelSerializer):
@@ -34,10 +34,6 @@ class GetChatRoomSerializer(ModelSerializer):
         exclude = ['date_created', 'last_updated']
 
 
-class ContentSerializer(ModelSerializer):
-    class Meta:
-        model = Content
-        fields = ['current_location', 'destination', 'distance', 'price']
 
 
 class RecursiveSerializer(serializers.Serializer):
@@ -48,21 +44,17 @@ class RecursiveSerializer(serializers.Serializer):
 
 
 class CreateMessageSerializer(ModelSerializer):
-    content = ContentSerializer()
+
 
     class Meta:
         model = RoomMessage
-        fields = ['chat_room', 'user', 'description', 'is_question', 'is_answer', 'is_answered', 'content', 'parent']
+        fields = ['chat_room', 'user', 'message', 'is_question', 'is_answer', 'is_answered', 'content', 'parent']
 
-    def save(self, **kwargs):
-        content_data = self.validated_data.pop('content')
-        content = Content.objects.create(**content_data)
-        message = RoomMessage.objects.create(content=content, **self.validated_data)
-        return message
+
 
 
 class RoomMessageSerializer(ModelSerializer):
-    content = ContentSerializer()
+
     user = serializers.StringRelatedField()
     replies = RecursiveSerializer(many=True, read_only=True)
     parent_id = serializers.IntegerField(write_only=True, required=False)
@@ -71,6 +63,6 @@ class RoomMessageSerializer(ModelSerializer):
         model = RoomMessage
         fields = [
             'id', 'user', 'description', 'is_question',
-            'is_answer', 'is_answered', 'content', 'date_created',
+            'is_answer', 'is_answered', 'date_created',
             'replies', 'parent_id'
         ]
