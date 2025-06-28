@@ -1,4 +1,6 @@
 # consumers.py
+from pyexpat.errors import messages
+
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -6,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import timezone
-from community.models import ChatRoom, RoomMessage, Content
+from community.models import ChatRoom, RoomMessage
 import json
 
 from community.serializers import CreateMessageSerializer, RoomMessageSerializer
@@ -22,12 +24,12 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.room_group_name = f'community_chat_{self.room_id}'
+        self.room_group_name = f'chat_{self.room_id}'
 
         self.user = self.scope["user"]
 
         if isinstance(self.user, AnonymousUser):
-            await self.close(code=403)  # Reject unauthenticated users
+            await self.close(code=403, reason="User not authenticated")  # Reject unauthenticated users
             return
 
         # 🚶‍♀️‍➡️Join the room group
@@ -77,41 +79,31 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         if self.room and self.room.open:
             # Check if this message is a reply by looking for a parent_id
             parent_id = data.get('parent_id') if data.get('parent_id') else None
-            # Here, we use the "description" field to store the message text.
+
+            #Todo check if message is not null in the future and also check if content exists
+
             message = {
-                'user': int(data['content']['message']['user']),
-                'chat_room': int(data['content']['message']['chat_room']),
-                'description': data['content']['message']['description'],
-                'is_question': data['content']['message']['is_question'],
-                'is_answer': data['content']['message']['is_answer'],
-                'is_answered': data['content']['message']['is_answered'],
-                'content': data['content']['message']['content'],
+                'user': int(data['user']),
+                'chat_room': int(data['chat_room']),
+                'message': data['message'],
                 'parent': parent_id
             }
             message = await self.create_message(message, parent_id)
+
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
                     "type": "chat_message",  # This triggers `chat_message` method
-                    "message": {
+                    "body": {
                         "id": message.id,
                         "user": message.user.username,
                         "chat_room": message.chat_room.id,
-                        "description": message.description,
+                        "message": message.description,
                         "is_question": message.is_question,
-                        "is_answer": message.is_answer,
                         "is_answered": message.is_answered,
-                        "content": {
-                            "current_location": message.content.current_location,
-                            "destination": message.content.destination,
-                            "distance": message.content.distance,
-                            "price": message.content.price,
-                            "date_created": str(message.content.date_created.strftime("%Y-%m-%d %H:%M:%S"))
-                            if message.content.date_created else None,
-                        },
+                        "is_answer": message.is_answer,
                         "parent_id": message.parent.id if message.parent else None,
-                        "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S")
-                        if message.date_created else None
+                        "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S") if message.date_created else None
                     }
                 }
 
@@ -154,8 +146,8 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     def get_message_history(self):
         # Get all questions and their entire reply trees
         questions = RoomMessage.objects.filter(
-            chat_room_id=self.room_id
-        ).order_by('pk', 'content__pk').prefetch_related(
+            chat_room_id=self.room_id,
+        ).order_by('pk').prefetch_related(
             Prefetch('replies',
                      queryset=RoomMessage.objects.prefetch_related(
                          Prefetch('replies',
@@ -164,7 +156,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                      ),
                      to_attr='direct_replies'
                      )
-        ).select_related('user', 'content')
+        ).select_related('user')
 
         # Serialize with proper nesting
         return RoomMessageSerializer(questions, many=True).data
