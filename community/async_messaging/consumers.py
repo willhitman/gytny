@@ -74,8 +74,8 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
             #Todo check if message is not null in the future and also check if content exists
 
             message = {
-                'user': int(data['user']),
-                'chat_room': data['chat_room'],
+                'user': self.user.pk,
+                'chat_room': self.chat_id,
                 'message': data['message'],
                 "is_question": data['is_question'],
                 "is_answered": data['is_answered'],
