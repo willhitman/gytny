@@ -1,11 +1,6 @@
-# consumers.py
-from pyexpat.errors import messages
-
-from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
-from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Prefetch
 from django.utils import timezone
 from community.models import ChatRoom, RoomMessage
@@ -50,11 +45,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                 'history': history
             }))
         else:
-            await self.send(text_data=json.dumps({
-                'type': 'room_status',
-                'is_closed': True,
-                'history': []
-            }))
+            await self.close(code=4000, reason="Room is either closed or does not exist")
 
     async def disconnect(self, close_code):
         # Leave room group
@@ -86,6 +77,9 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                 'user': int(data['user']),
                 'chat_room': int(data['chat_room']),
                 'message': data['message'],
+                "is_question": data['is_question'],
+                "is_answered": data['is_answered'],
+                "is_answer": data['is_answer'],
                 'parent': parent_id
             }
             message = await self.create_message(message, parent_id)
@@ -97,8 +91,8 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                     "body": {
                         "id": message.id,
                         "user": message.user.username,
-                        "chat_room": message.chat_room.id,
-                        "message": message.description,
+                        "chat_room": message.chat_room.chat_id,
+                        "message": message.message,
                         "is_question": message.is_question,
                         "is_answered": message.is_answered,
                         "is_answer": message.is_answer,
@@ -140,7 +134,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     # --- Database Operations ---
     @database_sync_to_async
     def get_room(self):
-        return ChatRoom.objects.select_related("creator").filter(id=self.room_id).first()
+        return ChatRoom.objects.select_related("creator").filter(id=self.room_id, open=True).first()
 
     @database_sync_to_async
     def get_message_history(self):
@@ -189,7 +183,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
     # --- Group Message Handlers ---
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps(event['message'], ensure_ascii=False))
+        await self.send(text_data=json.dumps(event['body'], ensure_ascii=False))
 
     async def room_closed(self, event):
         await self.send(text_data=json.dumps({
