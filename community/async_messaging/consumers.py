@@ -14,12 +14,12 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         super().__init__(*args, **kwargs)
         self.room = None
         self.user = None
-        self.room_group_name = None
-        self.room_id = None
+        self.chat_id = None
 
     async def connect(self):
-        self.room_id = self.scope['url_route']['kwargs']['room_id']
-        self.room_group_name = f'chat_{self.room_id}'
+        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+
+
 
         self.user = self.scope["user"]
 
@@ -29,7 +29,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
         # 🚶‍♀️‍➡️Join the room group
         await self.channel_layer.group_add(
-            self.room_group_name,
+            self.chat_id,
             self.channel_name
         )
         await self.accept()
@@ -50,7 +50,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         # Leave room group
         await self.channel_layer.group_discard(
-            self.room_group_name,
+            self.chat_id,
             self.channel_name
         )
 
@@ -75,7 +75,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
             message = {
                 'user': int(data['user']),
-                'chat_room': int(data['chat_room']),
+                'chat_room': data['chat_room'],
                 'message': data['message'],
                 "is_question": data['is_question'],
                 "is_answered": data['is_answered'],
@@ -85,7 +85,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
             message = await self.create_message(message, parent_id)
 
             await self.channel_layer.group_send(
-                self.room_group_name,
+                self.chat_id,
                 {
                     "type": "chat_message",  # This triggers `chat_message` method
                     "body": {
@@ -105,7 +105,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
 
     async def handle_typing(self, data):
         await self.channel_layer.group_send(
-            self.room_group_name,
+            self.chat_id,
             {
                 "type": "typing_event",
                 "user": self.user.username
@@ -123,7 +123,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
         if room and room.creator == self.user:
             room = await self.close_room()
             await self.channel_layer.group_send(
-                self.room_group_name,
+                self.chat_id,
                 {
                     'type': 'room_closed',
                     'closed_by': self.user.username,
@@ -134,13 +134,13 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
     # --- Database Operations ---
     @database_sync_to_async
     def get_room(self):
-        return ChatRoom.objects.select_related("creator").filter(id=self.room_id, open=True).first()
+        return ChatRoom.objects.select_related("creator").filter(chat_id=self.chat_id, open=True).first()
 
     @database_sync_to_async
     def get_message_history(self):
         # Get all questions and their entire reply trees
         questions = RoomMessage.objects.filter(
-            chat_room_id=self.room_id,
+            chat_room__chat_id=self.chat_id,
         ).order_by('pk').prefetch_related(
             Prefetch('replies',
                      queryset=RoomMessage.objects.prefetch_related(
