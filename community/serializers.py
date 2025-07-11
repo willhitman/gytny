@@ -28,11 +28,22 @@ class CreateChatRoomSerializer(ModelSerializer):
 
 
 class GetChatRoomSerializer(ModelSerializer):
-    creator = CreatorSerializer()
 
     class Meta:
         model = ChatRoom
-        exclude = ['date_created', 'last_updated']
+        exclude = ['date_created', 'last_updated', 'id', 'open', 'closed_at', 'city']
+
+    def to_representation(self, instance):
+        print(instance.group)
+        if instance.group:
+            representation = super().to_representation(instance)
+            representation['group_name'] = instance.group_name
+            representation['chat_id'] = instance.chat_id
+            representation['users'] = instance.users.all().count()
+            return representation
+        else:
+            return instance
+
 
 
 
