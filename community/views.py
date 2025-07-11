@@ -34,8 +34,21 @@ class CreateChatRoomView(CreateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = ChatRoom.objects.all()
 
+    def perform_create(self, serializer):
+        serializer.save(creator=self.request.user)
+        # Optionally, you can add the creator to the room's users
+        chat_room = serializer.instance
+        chat_room.users.add(self.request.user)
+        chat_room.save()
+
 
 class GetChatRoomsView(ListAPIView):
     serializer_class = GetChatRoomSerializer
     queryset = ChatRoom.objects.all()
     permission_classes = [IsAuthenticated]
+
+    # def get_queryset(self, **kwargs):
+    #     latitude = kwargs.get('latitude')
+    #     longitude = kwargs.get('longitude')
+    #
+    #     city = ...
