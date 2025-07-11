@@ -1,8 +1,11 @@
+import secrets
 import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+def generate_user_id():
+    return secrets.token_hex(9).upper()
 
 # Create your models here.
 class User(AbstractUser):
@@ -18,6 +21,13 @@ class User(AbstractUser):
 
     username = models.CharField(max_length=50, blank=True, null=True, unique=True)
     email = models.EmailField(max_length=254, unique=True, default="server@gytny.co.za")
+
+    user_id = models.CharField(
+        max_length=18,
+        unique=True,
+        editable=False,
+        default=generate_user_id,
+    )
 
     first_name = models.CharField(max_length=50, blank=True, null=True)
     last_name = models.CharField(max_length=50, blank=True, null=True)
