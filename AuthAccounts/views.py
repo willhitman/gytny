@@ -28,7 +28,6 @@ class CreateAccountView(GenericAPIView):
         serializer = self.serializer_class(data=user_data, partial=True)
         if serializer.is_valid():
             user = User.objects.create(**serializer.data )
-            user.username = serializer.validated_data['email']
             user.set_password(serializer.data['password'])
             user.save()
             return Response({'message': 'Account created successfully'}, status=status.HTTP_201_CREATED)
