@@ -14,11 +14,12 @@ class CreatorSerializer(ModelSerializer):
 class CreateChatRoomSerializer(ModelSerializer):
     class Meta:
         model = ChatRoom
-        fields = ['creator']
+        fields = ['users', 'group']
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['creator'] = instance.creator.username
+        representation['chat_id'] = instance.chat_id
         representation['open'] = instance.open
         representation['closed_at'] = instance.closed_at
         representation['date_created'] = instance.date_created
@@ -48,7 +49,7 @@ class CreateMessageSerializer(ModelSerializer):
 
     class Meta:
         model = RoomMessage
-        fields = ['chat_room', 'user', 'message', 'is_question', 'is_answer', 'is_answered', 'content', 'parent']
+        fields = ['chat_room', 'user', 'message', 'is_question', 'is_answer', 'is_answered', 'parent']
 
 
 
@@ -62,7 +63,7 @@ class RoomMessageSerializer(ModelSerializer):
     class Meta:
         model = RoomMessage
         fields = [
-            'id', 'user', 'description', 'is_question',
+            'id', 'user', 'message', 'is_question',
             'is_answer', 'is_answered', 'date_created',
             'replies', 'parent_id'
         ]
