@@ -65,7 +65,7 @@ class ChatRoom(models.Model):
 
 
 class RoomMessage(models.Model):
-    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
+    chat_room = models.ForeignKey(ChatRoom, to_field='chat_id', on_delete=models.CASCADE, related_name='messages')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     message = models.TextField()
