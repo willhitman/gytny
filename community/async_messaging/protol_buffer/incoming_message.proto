@@ -1,7 +1,13 @@
 syntax = "proto3";
 
-message Person {
-  string name = 1;
-  int32 age = 2;
-  repeated string emails = 3;
+message IncomingMessage {
+  string action = 1;
+  string type = 2;
+  string message = 3;
+  string is_question = 4;
+  string is_answered = 5;
+  string is_answer = 6;
+  string parent = 7;
 }
+
+
