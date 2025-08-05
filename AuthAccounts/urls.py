@@ -49,6 +49,7 @@ urlpatterns = [
     path('create-account/', views.CreateAccountView.as_view(), name='create-account'),
     path('google-sso/', views.SocialLoginView.as_view(), name='google-sso'),
     path('forgot-password-code/', views.ForgotPasswordResetCodeView.as_view(), name='forgot-password-code'),
-    path('forgot-password-reset/', views.ForgotPasswordResetView.as_view(), name='forgot-password-reset')
+    path('forgot-password-reset/', views.ForgotPasswordResetView.as_view(), name='forgot-password-reset'),
+    path('verify-user-email/', views.VerifyUserEmailView.as_view(), name='verify-email'),
 
 ]
