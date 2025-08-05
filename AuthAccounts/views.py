@@ -1,4 +1,5 @@
 import json
+from django.utils import timezone
 
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
@@ -10,17 +11,21 @@ from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from .models import User, UserAccountPasswordResetPin
-from AuthAccounts.serializers import UserCreateSerializer, ForgotPasswordSerializer, ForgotPasswordResetSerializer
+from AuthAccounts.serializers import UserCreateSerializer, ForgotPasswordSerializer, ForgotPasswordResetSerializer, \
+    VerifyUserSerializer
 from mailing.background_tasks import send_verification_email, send_password_reset_pin_email
 
+
+class CustomUserThrottle(AnonRateThrottle):
+    rate = '3/hour'
 
 def verify_email(user):
     if not user:
         return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     else:
         # check and generate verification token if none is found
-        if not user.verification_token:
-            user.generate_verification_token()
+        if not user.verification_pin:
+            user.generate_verification_pin()
             user.save()
         # Now send the token
         send_verification_email.delay(user.email, user.verification_token)
@@ -49,17 +54,49 @@ class CreateAccountView(GenericAPIView):
         if serializer.is_valid():
             self.user = User.objects.create(**serializer.validated_data )
             self.user.set_password(serializer.validated_data['password'])
-            self.user.generate_verification_token()
+            self.user.generate_verification_pin()
+            self.user.token_created_at = timezone.now()
             self.user.save()
-            result = verify_email(self.user)
-            if not result:
-                self.user.delete()
-                return Response({'error': 'Verification email could not be sent'},
-                                status=status.HTTP_400_BAD_REQUEST)
+
+            if not self.user:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
             else:
-                send_verification_email.delay(self.user.email, self.user.verification_token)
+                # check and generate verification token if none is found
+                if not self.user.verification_pin:
+                    self.user.generate_verification_pin()
+
+                    self.user.save()
+                # Now send the token
+                send_verification_email.delay(self.user.email, self.user.verification_pin)
+
             return Response({'message': 'Account created successfully'}, status=status.HTTP_201_CREATED)
 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class VerifyUserEmailView(GenericAPIView):
+    permission_classes = [AllowAny]
+    queryset = User.objects.all()
+    serializer_class = VerifyUserSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid():
+            pin = serializer.validated_data['pin']
+            email = serializer.validated_data['email']
+            try:
+                user = self.queryset.get(email=email, verification_pin=pin)
+            except User.DoesNotExist:
+                return Response({'error': 'Invalid verification pin'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if user.is_verified:
+                return Response({'message': 'User is already verified'}, status=status.HTTP_200_OK)
+            print(user.is_pin_valid())
+            if user.is_pin_valid():
+                user.verify_user()
+                return Response({'message': 'User verified successfully'}, status=status.HTTP_200_OK)
+            else:
+                return Response({'error': 'Verification pin has expired'}, status=status.HTTP_401_UNAUTHORIZED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -71,7 +108,7 @@ class ForgotPasswordResetCodeView(GenericAPIView):
     serializer_class = ForgotPasswordSerializer
     permission_classes = [AllowAny]
     queryset = User.objects.all()
-    throttle_classes = [AnonRateThrottle]
+    throttle_classes = [CustomUserThrottle]
 
     def post(self, request, **kwargs):
 
@@ -96,7 +133,7 @@ class ForgotPasswordResetView(GenericAPIView):
     serializer_class = ForgotPasswordResetSerializer
     permission_classes = [AllowAny]
     queryset = UserAccountPasswordResetPin.objects.all()
-    throttle_classes = [AnonRateThrottle]
+    throttle_classes = [CustomUserThrottle]
 
     def post(self, request):
         serializer = self.serializer_class(data = request.data)
