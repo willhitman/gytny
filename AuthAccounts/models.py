@@ -1,8 +1,11 @@
 import secrets
+import string
 import uuid
 
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+import secrets
+from django.utils import timezone
 
 def generate_user_id():
     return secrets.token_hex(9).upper()
@@ -46,11 +49,33 @@ class User(AbstractUser):
 
     city = models.CharField(max_length=100, blank=True, null=True)
 
+    is_verified = models.BooleanField(default=False)
+
+    verification_token = models.CharField(max_length=64, blank=True, null=True)
+    token_created_at = models.DateTimeField(null=True, blank=True)
+
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
 
+    def generate_verification_token(self):
+        self.verification_token = secrets.token_urlsafe(48)
+        self.token_created_at = timezone.now()
+        return self.verification_token
+
+    def is_token_valid(self):
+        if not self.token_created_at:
+            return False
+        expiration_time = self.token_created_at + timezone.timedelta(hours=24)
+        return timezone.now() <= expiration_time
+
+    def verify_user(self):
+        self.is_verified = True
+        self.save()
+        return self
+
     def __str__(self):
         return f'{self.username}'
+
 
 
 class UserSocials(models.Model):
@@ -59,5 +84,37 @@ class UserSocials(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.link}'
+
+
+class UserAccountPasswordResetPin(models.Model):
+    user = models.ForeignKey(
+        to=User,
+        to_field='user_id',
+        on_delete = models.CASCADE,
+        blank=True,
+        null = True,
+        related_name='user_pins')
+
+    pin = models.CharField(max_length=6, blank=True, null=True)
+
+    date_created = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    last_updated = models.DateTimeField(auto_now=True, null=True, blank=True)
+
+    def generate_verification_pin(self):
+        digits = string.digits
+        secure_random = secrets.SystemRandom()
+        pin = ''.join(secure_random.choice(digits) for _ in range(6))
+        self.pin = pin
+        return self.pin
+
+    def is_pin_valid(self):
+        if not self.last_updated:
+            return False
+        expiration_time = self.last_updated + timezone.timedelta(hours=3)
+        return timezone.now() <= expiration_time
+
+
+    def __str__(self):
+        return f'{self.user.username} {self.user.user_id}'
 
 
