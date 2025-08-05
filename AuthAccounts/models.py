@@ -51,16 +51,18 @@ class User(AbstractUser):
 
     is_verified = models.BooleanField(default=False)
 
-    verification_token = models.CharField(max_length=64, blank=True, null=True)
+    verification_pin = models.CharField(max_length=6, blank=True, null=True)
     token_created_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = 'username'
     EMAIL_FIELD = 'email'
 
-    def generate_verification_token(self):
-        self.verification_token = secrets.token_urlsafe(48)
-        self.token_created_at = timezone.now()
-        return self.verification_token
+    def generate_verification_pin(self):
+        digits = string.digits
+        secure_random = secrets.SystemRandom()
+        pin = ''.join(secure_random.choice(digits) for _ in range(6))
+        self.verification_pin = pin
+        return self.verification_pin
 
     def is_token_valid(self):
         if not self.token_created_at:
