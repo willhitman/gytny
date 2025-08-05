@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.fields import CharField
 from rest_framework.serializers import ModelSerializer
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -30,3 +31,20 @@ class UserCreateSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name',  'last_name', 'username', 'date_of_birth', 'gender', 'email','password']
+
+
+class ForgotPasswordSerializer(ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['email']
+
+
+class ForgotPasswordResetSerializer(serializers.Serializer):
+
+    password = serializers.CharField(allow_null=False, allow_blank=False)
+    password_confirm_field = serializers.CharField(allow_null=False, allow_blank=False)
+    pin = serializers.CharField(allow_null=False, allow_blank=False)
+
+    class Meta:
+        fields =['password', 'password_confirm_field', 'pin']
