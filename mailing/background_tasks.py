@@ -8,13 +8,13 @@ from django.urls import reverse
 from django.conf import settings
 
 
-@shared_task(bind=True, max_retries=3)
-def send_verification_email(self, email, token, verification=True):
+@shared_task(bind=True, max_retries=2)
+def send_verification_email(self, email, pin, verification=True):
     try:
-        verification_url = settings.FRONTEND_VERIFICATION_URL.format(token=token)
+
 
         subject = "Verify Your Email Address"
-        text_content = f"Please verify your email: {verification_url}"
+        text_content = f"Please verify your email: {pin}"
 
         msg = EmailMultiAlternatives(
             subject=subject,
@@ -26,7 +26,7 @@ def send_verification_email(self, email, token, verification=True):
 
 
         html_content = render_to_string('emails/verification_email.html', {
-            'verification_url': verification_url,
+            'pin': pin,
         })
 
         msg.attach_alternative(html_content, "text/html")
@@ -44,7 +44,7 @@ def send_verification_email(self, email, token, verification=True):
         # Actually send
         msg.send()
 
-        print(f"Email sent to {email} with token {token}")
+        print(f"Email sent to {email} with token {pin}")
 
     except smtplib.SMTPException as e:
         print(f"SMTP Error sending to {email}: {str(e)}")
@@ -54,7 +54,7 @@ def send_verification_email(self, email, token, verification=True):
         self.retry(exc=e, countdown=60 * (2 ** self.request.retries))
 
 
-@shared_task(bind=True, max_retries=3)
+@shared_task(bind=True, max_retries=2)
 def send_password_reset_pin_email(self, email, pin):
     try:
 
@@ -89,7 +89,7 @@ def send_password_reset_pin_email(self, email, pin):
         # Actually send
         msg.send()
 
-        print(f"Email sent to {email} with token {token}")
+        print(f"Email sent to {email} with token {pin}")
 
     except smtplib.SMTPException as e:
         print(f"SMTP Error sending to {email}: {str(e)}")
