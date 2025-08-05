@@ -5,9 +5,8 @@ from django.db.models import Prefetch
 from django.utils import timezone
 from community.models import ChatRoom, RoomMessage
 import json
-
 from community.serializers import CreateMessageSerializer, RoomMessageSerializer
-
+from community.async_messaging.protol_buffer import incoming_message_pb2
 
 class CommunityChatConsumer(AsyncWebsocketConsumer):
     def __init__(self, *args, **kwargs):
@@ -90,7 +89,7 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",  # This triggers `chat_message` method
                     "body": {
                         "id": message.id,
-                        "user": message.user.username,
+                        "user": message.user.user_id,
                         "chat_room": message.chat_room.chat_id,
                         "message": message.message,
                         "is_question": message.is_question,
@@ -100,7 +99,6 @@ class CommunityChatConsumer(AsyncWebsocketConsumer):
                         "timestamp": message.date_created.strftime("%Y-%m-%d %H:%M:%S") if message.date_created else None
                     }
                 }
-
             )
 
     async def handle_typing(self, data):
