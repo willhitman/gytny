@@ -48,3 +48,12 @@ class ForgotPasswordResetSerializer(serializers.Serializer):
 
     class Meta:
         fields =['password', 'password_confirm_field', 'pin']
+
+class VerifyUserSerializer(serializers.Serializer):
+    pin = CharField(min_length=6, max_length=6, allow_null=False, allow_blank=False)
+    email = serializers.EmailField(allow_null=False, allow_blank=False)
+
+    def validate_pin(self, value):
+        if not value.isdigit():
+            raise serializers.ValidationError("Verification pin must only contain digits.")
+        return value
