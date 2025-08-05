@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'guide',
 
     'community',
+    'mailing',
 
 ]
 
@@ -93,6 +94,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
 ]
 
@@ -101,7 +103,6 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
