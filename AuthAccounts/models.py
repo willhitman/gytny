@@ -62,9 +62,10 @@ class User(AbstractUser):
         secure_random = secrets.SystemRandom()
         pin = ''.join(secure_random.choice(digits) for _ in range(6))
         self.verification_pin = pin
+        self.token_created_at = timezone.now()
         return self.verification_pin
 
-    def is_token_valid(self):
+    def is_pin_valid(self):
         if not self.token_created_at:
             return False
         expiration_time = self.token_created_at + timezone.timedelta(hours=24)
