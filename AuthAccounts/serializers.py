@@ -57,3 +57,9 @@ class VerifyUserSerializer(serializers.Serializer):
         if not value.isdigit():
             raise serializers.ValidationError("Verification pin must only contain digits.")
         return value
+
+class UploadProfilePictureSerializer(ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['']
